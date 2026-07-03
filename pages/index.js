@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Mail, Search, ChevronRight, AlertCircle, Calendar, FileText, Target, Zap, ArrowLeft } from 'lucide-react';
-import { textesEnrichis } from '../data/textes150';
+import { textesEnrichis } from '../data/textes';
 
 export default function Home() {
   const [view, setView] = useState('flux');
