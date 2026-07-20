@@ -1,0 +1,43 @@
+name: Veille juridique — collecte CNDJ
+
+# Runs the legal-watch collector on a schedule (and on demand), refreshing
+# data/textes.js from the CNDJ database. If the data changed, it commits the
+# update, which triggers the connected Vercel/Railway deployment.
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # every day at 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: 'Pages per text type to fetch'
+        required: false
+        default: '3'
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Collect regulations from CNDJ
+        run: node scripts/collect-textes.mjs --pages "${{ github.event.inputs.pages || '3' }}"
+
+      - name: Commit refreshed data if changed
+        run: |
+          if git diff --quiet -- data/textes.js; then
+            echo "No changes — nothing to commit."
+            exit 0
+          fi
+          git config user.name "regalert-bot"
+          git config user.email "bot@regalertci.com"
+          git add data/textes.js
+          git commit -m "chore(veille): refresh regulations from CNDJ"
+          git push
