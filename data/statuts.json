@@ -1,1 +1,54 @@
-{}
+{
+  "cndj:67622": {
+    "statut": "hors_scope",
+    "date": "2026-07-28"
+  },
+  "cndj:67669": {
+    "statut": "en_base",
+    "date": "2026-07-28"
+  },
+  "cndj:67670": {
+    "statut": "en_base",
+    "date": "2026-07-28"
+  },
+  "energie:https://www.energie.gouv.ci/document/arrete-interministeriel-n-156-mmpe-mclu-mt-mineddte-mci-du-23-avril-2024-portant-audit-energetique": {
+    "statut": "en_base",
+    "date": "2026-07-28"
+  },
+  "environnement:https://www.environnement.gouv.ci/actualite/616": {
+    "statut": "hors_scope",
+    "date": "2026-07-28"
+  },
+  "environnement:https://www.environnement.gouv.ci/actualite/621": {
+    "statut": "hors_scope",
+    "date": "2026-07-28"
+  },
+  "environnement:https://www.environnement.gouv.ci/uploads/publications/177332357270.pdf": {
+    "statut": "en_base",
+    "date": "2026-07-28"
+  },
+  "gouv:https://www.gouv.ci/actualite/ecologie-et-changements-climatiques-le-ministre-abou-bamba-reaffirme-lambition-ecologique-de-la-cote-divoire-a-la-8e-edition-des-jfac-3171": {
+    "statut": "hors_scope",
+    "date": "2026-07-28"
+  },
+  "gouv:https://www.gouv.ci/actualite/fete-de-lindependance-2026-le-ministre-amede-koffi-kouakou-evalue-les-dispositifs-deau-dassainissement-et-de-salubrite-3040": {
+    "statut": "hors_scope",
+    "date": "2026-07-28"
+  },
+  "gouv:https://www.gouv.ci/actualite/levee-de-la-mise-en-demeure-visant-sucaf-ci-le-ministre-abou-bamba-rassure-sur-la-reussite-des-operations-de-depollution-6213": {
+    "statut": "hors_scope",
+    "date": "2026-07-28"
+  },
+  "loidici:https://loidici.biz/2026/05/14/le-code-de-lassainissement-et-du-drainage/bon-a-savoir/76459/naty/": {
+    "statut": "en_base",
+    "date": "2026-07-28"
+  },
+  "loidici:https://loidici.biz/2026/05/23/les-mesures-generales-dhygiene-en-milieu-de-travail/bon-a-savoir/76831/naty/": {
+    "statut": "en_base",
+    "date": "2026-07-28"
+  },
+  "onpc:https://www.onpc-ci.org/actualite/lonpc-sensibilise-les-acteurs-du-tourisme-sur-le-certificat-de-securite-incendie-a-daoukro-adzope-et-agboville": {
+    "statut": "hors_scope",
+    "date": "2026-07-28"
+  }
+}
