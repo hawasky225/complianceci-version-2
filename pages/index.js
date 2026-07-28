@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { Mail, Search, ChevronRight, AlertCircle, Calendar, FileText, Target, Zap, ArrowLeft, ExternalLink, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Mail, Search, ChevronRight, AlertCircle, Calendar, FileText, Target, Zap, ArrowLeft, ExternalLink, ShieldAlert, CheckCircle2, Download, RotateCcw } from 'lucide-react';
 import { textesEnrichis } from '../data/textes';
 import { logSources, dernierRun } from '../data/veille-log';
+import statutsPublies from '../data/statuts.json';
 
 /** Rangs d'entrée, du plus contraignant au plus indicatif. */
 const TYPES = [
@@ -10,15 +11,92 @@ const TYPES = [
   { id: 'signal', libelle: 'Signaux de veille', couleur: 'bg-slate-100 text-slate-600' },
 ];
 
+/**
+ * Statuts de revue. Doit rester aligné sur scripts/veille/statuts.mjs — c'est
+ * ce module qui fait autorité côté collecte.
+ */
+const STATUTS = [
+  { code: 'a_analyser', libelle: 'À analyser', couleur: 'bg-amber-100 text-amber-800', actif: 'bg-amber-500 text-white' },
+  { code: 'validee', libelle: 'Validée', couleur: 'bg-green-100 text-green-800', actif: 'bg-green-600 text-white' },
+  { code: 'hors_scope', libelle: 'Hors scope', couleur: 'bg-slate-200 text-slate-600', actif: 'bg-slate-600 text-white' },
+  { code: 'en_base', libelle: 'Ajoutée à la base', couleur: 'bg-blue-100 text-blue-800', actif: 'bg-blue-600 text-white' },
+];
+
+const STATUT_DEFAUT = 'a_analyser';
+const CLE_STOCKAGE = 'veille-hse-statuts';
+const infoStatut = (code) => STATUTS.find((s) => s.code === code) || STATUTS[0];
+
 export default function Home() {
   const [view, setView] = useState('flux');
   const [selectedText, setSelectedText] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDomains, setSelectedDomains] = useState(['Tous']);
   const [selectedType, setSelectedType] = useState('Tous');
+  const [selectedStatut, setSelectedStatut] = useState('Tous');
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', company: '' });
   const [submitted, setSubmitted] = useState(false);
+
+  // Décisions de revue prises dans le navigateur, en attente d'export.
+  // Le site étant statique, elles vivent en localStorage jusqu'à ce qu'on
+  // exporte data/statuts.json et qu'on le committe.
+  const [brouillon, setBrouillon] = useState({});
+  const [charge, setCharge] = useState(false);
+
+  useEffect(() => {
+    try {
+      const brut = window.localStorage.getItem(CLE_STOCKAGE);
+      if (brut) setBrouillon(JSON.parse(brut));
+    } catch {
+      // Stockage indisponible (navigation privée) : on continue sans brouillon.
+    }
+    setCharge(true);
+  }, []);
+
+  useEffect(() => {
+    if (!charge) return; // ne pas écraser le stockage avant de l'avoir lu
+    try {
+      window.localStorage.setItem(CLE_STOCKAGE, JSON.stringify(brouillon));
+    } catch {
+      // Écriture impossible : les décisions restent valables pour la session.
+    }
+  }, [brouillon, charge]);
+
+  /** Statut effectif : brouillon local s'il existe, sinon statut publié. */
+  const statutDe = (texte) => {
+    const local = brouillon[texte.sourceRef];
+    if (local) return local.statut;
+    const publie = statutsPublies[texte.sourceRef];
+    return publie ? publie.statut : STATUT_DEFAUT;
+  };
+
+  const changerStatut = (texte, code) => {
+    setBrouillon((prec) => {
+      const suivant = { ...prec };
+      const publie = statutsPublies[texte.sourceRef];
+      const statutPublie = publie ? publie.statut : STATUT_DEFAUT;
+      if (code === statutPublie) delete suivant[texte.sourceRef]; // retour à l'état publié
+      else suivant[texte.sourceRef] = { statut: code, date: new Date().toISOString().slice(0, 10) };
+      return suivant;
+    });
+  };
+
+  const nbEnAttente = Object.keys(brouillon).length;
+
+  /** Produit data/statuts.json : décisions publiées + brouillon local. */
+  const exporterStatuts = () => {
+    const fusion = { ...statutsPublies };
+    for (const [ref, v] of Object.entries(brouillon)) fusion[ref] = v;
+    const trie = {};
+    for (const ref of Object.keys(fusion).sort()) trie[ref] = fusion[ref];
+    const blob = new Blob([JSON.stringify(trie, null, 2) + '\n'], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'statuts.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Les domaines sont déduits du registre : la taxonomie évolue avec le
   // classifieur, une liste figée ici finirait par ne plus rien filtrer.
@@ -37,15 +115,25 @@ export default function Home() {
       const matchDomain = selectedDomains.includes('Tous')
         || (text.domaines || []).some(d => selectedDomains.includes(d));
       const matchType = selectedType === 'Tous' || text.typeEntree === selectedType;
-      return matchSearch && matchDomain && matchType;
+      const matchStatut = selectedStatut === 'Tous' || statutDe(text) === selectedStatut;
+      return matchSearch && matchDomain && matchType && matchStatut;
     });
-  }, [searchTerm, selectedDomains, selectedType]);
+  }, [searchTerm, selectedDomains, selectedType, selectedStatut, brouillon]);
 
   const compteParType = useMemo(() => {
     const c = {};
     for (const t of textesEnrichis) c[t.typeEntree] = (c[t.typeEntree] || 0) + 1;
     return c;
   }, []);
+
+  const compteParStatut = useMemo(() => {
+    const c = {};
+    for (const t of textesEnrichis) {
+      const s = statutDe(t);
+      c[s] = (c[s] || 0) + 1;
+    }
+    return c;
+  }, [brouillon]);
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -111,6 +199,15 @@ export default function Home() {
                 );
               })}
             </div>
+            <h3 className="text-sm font-semibold text-slate-900 mb-4">Filtrer par statut de revue</h3>
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button onClick={() => setSelectedStatut('Tous')} className={`px-4 py-2 rounded-full font-medium transition ${selectedStatut === 'Tous' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>Tous</button>
+              {STATUTS.map(s => (
+                <button key={s.code} onClick={() => setSelectedStatut(s.code)} className={`px-4 py-2 rounded-full font-medium transition ${selectedStatut === s.code ? s.actif : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                  {s.libelle} ({compteParStatut[s.code] || 0})
+                </button>
+              ))}
+            </div>
             <h3 className="text-sm font-semibold text-slate-900 mb-4">Filtrer par domaine</h3>
             <div className="flex flex-wrap gap-2">
               {domains.map(domain => (
@@ -118,6 +215,23 @@ export default function Home() {
               ))}
             </div>
           </div>
+
+          {nbEnAttente > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 flex flex-wrap items-center justify-between gap-4">
+              <div className="text-sm text-blue-900">
+                <p className="font-semibold">{nbEnAttente} décision(s) de revue non publiée(s)</p>
+                <p>Enregistrées dans ce navigateur uniquement. Exportez <code className="bg-blue-100 px-1 rounded">statuts.json</code>, placez-le dans <code className="bg-blue-100 px-1 rounded">data/</code> et committez pour les rendre définitives.</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setBrouillon({})} className="bg-white border border-blue-300 text-blue-700 px-4 py-2 rounded-lg font-medium hover:bg-blue-100 transition flex items-center gap-2">
+                  <RotateCcw size={16} /> Annuler
+                </button>
+                <button onClick={exporterStatuts} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2">
+                  <Download size={16} /> Exporter statuts.json
+                </button>
+              </div>
+            </div>
+          )}
 
           <h2 className="text-2xl font-bold text-slate-900 mb-6">{filteredTexts.length} résultat{filteredTexts.length > 1 ? 's' : ''}</h2>
           <div className="space-y-4">
@@ -139,9 +253,29 @@ export default function Home() {
                     <span key={m} className="bg-slate-50 text-slate-600 text-xs px-2 py-1 rounded border border-slate-200">{m}</span>
                   ))}
                 </div>
-                <div className="flex items-center justify-between text-sm text-slate-500">
+                <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
                   <span>📅 {text.datePublication || `détecté le ${text.dateDetection}`} • {text.source}</span>
                   <ChevronRight size={18} />
+                </div>
+                {/* Barre de revue : le clic ne doit pas ouvrir le détail. */}
+                <div onClick={(e) => e.stopPropagation()} className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+                  <span className="text-xs font-semibold text-slate-500 mr-1">Statut :</span>
+                  {STATUTS.map(s => {
+                    const actif = statutDe(text) === s.code;
+                    return (
+                      <button
+                        key={s.code}
+                        onClick={() => changerStatut(text, s.code)}
+                        aria-pressed={actif}
+                        className={`text-xs px-3 py-1 rounded-full font-medium transition ${actif ? s.actif : 'bg-slate-50 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}
+                      >
+                        {s.libelle}
+                      </button>
+                    );
+                  })}
+                  {brouillon[text.sourceRef] && (
+                    <span className="text-xs text-blue-700 font-medium">• non publié</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -205,7 +339,32 @@ export default function Home() {
             </div>
           </div>
 
-          {selectedText.statutRevue === 'À analyser' && (
+          <div className="bg-white rounded-xl p-6 border border-slate-200 mb-8">
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Statut de revue</h3>
+            <div className="flex flex-wrap items-center gap-2">
+              {STATUTS.map(s => {
+                const actif = statutDe(selectedText) === s.code;
+                return (
+                  <button
+                    key={s.code}
+                    onClick={() => changerStatut(selectedText, s.code)}
+                    aria-pressed={actif}
+                    className={`text-sm px-4 py-2 rounded-full font-medium transition ${actif ? s.actif : 'bg-slate-50 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}
+                  >
+                    {s.libelle}
+                  </button>
+                );
+              })}
+              {brouillon[selectedText.sourceRef] && (
+                <span className="text-sm text-blue-700 font-medium">• non publié</span>
+              )}
+            </div>
+            {selectedText.noteRevue && (
+              <p className="text-sm text-slate-600 mt-3"><span className="font-semibold text-slate-900">Note :</span> {selectedText.noteRevue}</p>
+            )}
+          </div>
+
+          {statutDe(selectedText) === 'a_analyser' && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8 flex gap-3">
               <ShieldAlert size={20} className="text-amber-600 shrink-0 mt-0.5" />
               <div className="text-sm text-amber-900">

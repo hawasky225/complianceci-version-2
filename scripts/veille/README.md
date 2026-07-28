@@ -6,7 +6,7 @@ la sécurité et de l'environnement, à partir des sources officielles.
 ```bash
 npm run veille            # collecte (2 pages CNDJ par nature)
 npm run veille -- --pages 5
-npm test                  # vérifie le classifieur
+npm test                  # vérifie le classifieur et les statuts
 ```
 
 Un run réécrit trois fichiers :
@@ -16,6 +16,53 @@ Un run réécrit trois fichiers :
 | `data/textes.js` | le registre publié par le site |
 | `data/veille-log.js` | journal d'accessibilité par source (équivalent de l'onglet « Log du run ») |
 | `data/registre-veille.csv` | export au format du registre, ouvrable dans Excel |
+
+Un quatrième fichier, `data/statuts.json`, n'est **jamais** écrit par la
+collecte : il porte les décisions humaines (voir « Revue » ci-dessous).
+
+## Revue : le statut de chaque entrée
+
+Quatre statuts, définis dans `statuts.mjs` :
+
+| Code | Libellé | Sens |
+|---|---|---|
+| `a_analyser` | À analyser | détecté, pas encore examiné (défaut) |
+| `validee` | Validée | examiné, pertinent pour la veille HSE |
+| `hors_scope` | Hors scope | examiné et écarté |
+| `en_base` | Ajoutée à la base | intégré au registre légal, traitement terminé |
+
+Les décisions vivent dans `data/statuts.json`, **séparé du registre**. La
+séparation est délibérée : une décision humaine ne doit pas dépendre d'un
+fichier que le robot réécrit chaque nuit, et le diff Git d'une revue reste
+lisible. La clé est le `sourceRef`, pas l'`id` — les id sont renumérotés à
+chaque run selon l'ordre de tri.
+
+### Dans le navigateur
+
+Chaque entrée porte ses quatre boutons de statut, et la page se filtre par
+statut. Le site étant statique, les clics sont gardés en `localStorage` : une
+bannière indique le nombre de décisions non publiées et propose « Exporter
+statuts.json ». Placer le fichier téléchargé dans `data/`, committer, et la
+prochaine collecte les répercute.
+
+### En ligne de commande
+
+```bash
+npm run veille:statut -- --liste                 # tout le registre
+npm run veille:statut -- --liste a_analyser      # ce qui reste à traiter
+npm run veille:statut -- cndj:67669 validee
+npm run veille:statut -- 3 hors_scope "Concerne les collectivités"
+npm run veille:statut -- --importer ~/Téléchargements/statuts.json
+```
+
+La cible accepte un `sourceRef` ou le numéro affiché par `--liste`. La saisie
+du statut tolère accents, majuscules et tirets — `Validée`, `validee` et
+`VALIDEE` sont équivalents, et `Non applicable` (vocabulaire du registre
+manuel) est reconnu comme `hors_scope`. `--importer` **fusionne** au lieu de
+remplacer, pour ne pas perdre les décisions prises entre-temps au terminal.
+
+Poser un statut ne relance pas de collecte : lancer `npm run veille` ensuite
+pour le répercuter dans `data/textes.js` et le CSV.
 
 Le workflow `.github/workflows/veille-hse.yml` exécute la collecte tous les
 jours à 06:00 UTC, lance les tests avant de publier, et committe si le registre
@@ -113,6 +160,10 @@ pour rester visible dans le journal.
 
 Il détecte et classe ; il **n'analyse pas**. Les rubriques « Ce qui change »,
 « Obligations » et « Sanctions » restent des gabarits jusqu'à saisie par un
-juriste, et le site affiche un avertissement explicite tant que
-`statutRevue === 'À analyser'`. Les champs saisis à la main sont préservés
-d'un run à l'autre : la collecte ne réécrit que les champs automatiques.
+juriste, et le site affiche un avertissement explicite tant que le statut vaut
+`a_analyser`. Les champs saisis à la main sont préservés d'un run à l'autre :
+la collecte ne réécrit que les champs automatiques.
+
+Le registre ne contient que des entrées **traçables** : toute entrée sans
+`sourceRef` est ignorée, ce qui a définitivement écarté les 175 entrées de
+démonstration fabriquées que portait `main`.
