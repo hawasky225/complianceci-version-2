@@ -8,7 +8,8 @@
     "start": "next start",
     "export": "next export",
     "veille": "node scripts/collect-veille.mjs",
-    "test": "node --test scripts/veille/hse.test.mjs"
+    "test": "node --test scripts/veille/hse.test.mjs scripts/veille/statuts.test.mjs",
+    "veille:statut": "node scripts/statut-veille.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",

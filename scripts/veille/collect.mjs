@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { SOURCES_ACTIVES, SOURCES_BLOQUEES } from './sources.mjs';
 import { classifier, extraireNumero, LIBELLE_TYPE } from './hse.mjs';
 import { expliquerErreur } from './fetcher.mjs';
+import { lireStatuts, libelleStatut, STATUT_DEFAUT, CODES } from './statuts.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const RACINE = join(__dirname, '..', '..');
@@ -45,9 +46,14 @@ async function lireRegistreExistant() {
   }
 }
 
-/** Champs saisis par un analyste, à ne jamais écraser par une collecte. */
+/**
+ * Champs saisis par un analyste, à ne jamais écraser par une collecte.
+ *
+ * `statutRevue` n'y figure pas : il vient de data/statuts.json, qui fait
+ * autorité et est réappliqué après la fusion.
+ */
 const CHAMPS_MANUELS = [
-  'ceQuiChange', 'obligationsPrincipales', 'sanctions', 'statutRevue',
+  'ceQuiChange', 'obligationsPrincipales', 'sanctions',
   'badge', 'ministere', 'secteurs', 'commentaire',
 ];
 
@@ -150,7 +156,6 @@ function versEntree(rec, id, aujourdhui) {
     sourceId: rec.sourceId,
     sourceRef: rec.sourceRef,
     statut: 'En vigueur',
-    statutRevue: 'À analyser',
     typeEntree: c.type,
     typeEntreeLibelle: LIBELLE_TYPE[c.type],
     datePublication: rec.date || '',
@@ -184,15 +189,13 @@ function versEntree(rec, id, aujourdhui) {
  * Une entrée déjà connue est mise à jour sur les champs automatiques
  * (classification, extrait, date) mais conserve ses champs manuels.
  */
-function fusionner(existants, records, aujourdhui, { conserverLegacy }) {
+function fusionner(existants, records, aujourdhui, statuts) {
   const parRef = new Map();
-  // Les entrées antérieures à la veille automatique n'ont pas de `sourceRef` :
-  // impossible de les rattacher à une source, donc de les rafraîchir ou de
-  // vérifier qu'elles existent encore. On ne les supprime jamais en silence.
-  const legacy = [];
+  // Seules les entrées porteuses d'un `sourceRef` sont conservées : sans lui,
+  // une entrée n'est rattachable à aucune source, donc ni vérifiable ni
+  // rafraîchissable. Le registre ne contient que du traçable.
   for (const e of existants) {
     if (e.sourceRef) parRef.set(e.sourceRef, e);
-    else legacy.push(e);
   }
 
   const nouveaux = [];
@@ -216,8 +219,17 @@ function fusionner(existants, records, aujourdhui, { conserverLegacy }) {
   }
 
   // Entrées connues non revues ce run : conservées telles quelles.
-  const conserves = [...parRef.values()];
-  const tout = [...conserves, ...nouveaux, ...(conserverLegacy ? legacy : [])];
+  const tout = [...parRef.values(), ...nouveaux];
+
+  // Le statut de revue vient de data/statuts.json, source unique de vérité :
+  // il ne doit pas dépendre du registre, que la collecte réécrit.
+  for (const e of tout) {
+    const decision = statuts[e.sourceRef];
+    e.statutRevue = decision ? decision.statut : STATUT_DEFAUT;
+    e.statutRevueLibelle = libelleStatut(e.statutRevue);
+    if (decision && decision.note) e.noteRevue = decision.note;
+    if (decision && decision.date) e.dateRevue = decision.date;
+  }
 
   // Textes réglementaires d'abord, puis actes, puis signaux ; à l'intérieur de
   // chaque rang, le plus récent d'abord, les non datés en fin.
@@ -239,7 +251,6 @@ function fusionner(existants, records, aujourdhui, { conserverLegacy }) {
     entrees: tout,
     nbNouveaux: nouveaux.length,
     nbMisAJour: misAJour.length,
-    nbLegacy: legacy.length,
   };
 }
 
@@ -280,11 +291,15 @@ function ecrireFichiers({ entrees, log, stats, aujourdhui }) {
   );
 
   // Export CSV au format du registre de veille (ouvrable dans Excel).
-  const colonnes = ['Date', 'Domaine', 'Source', 'URL', 'Extrait 300 car.', 'Mots-clés trouvés', 'Statut'];
+  const colonnes = [
+    'Date', 'Domaine', 'Source', 'URL', 'Extrait 300 car.', 'Mots-clés trouvés',
+    'Nature', 'Statut', 'Date revue', 'Note',
+  ];
   const lignes = entrees.map((e) =>
     [
       e.dateDetection || e.datePublication, e.domaine, e.source, e.lien,
-      e.extrait, e.motsCles, e.statutRevue,
+      e.extrait, e.motsCles, e.typeEntreeLibelle, e.statutRevueLibelle,
+      e.dateRevue || '', e.noteRevue || '',
     ].map(echapCsv).join(',')
   );
   writeFileSync(FICHIER_CSV, '﻿' + [colonnes.map(echapCsv).join(','), ...lignes].join('\r\n') + '\r\n');
@@ -292,22 +307,21 @@ function ecrireFichiers({ entrees, log, stats, aujourdhui }) {
 
 /* ------------------------------ point d'entrée ------------------------------ */
 
-export async function lancerVeille({ pages = 2, conserverLegacy = false } = {}) {
+export async function lancerVeille({ pages = 2 } = {}) {
   const aujourdhui = new Date().toISOString().slice(0, 10);
   console.log(`[veille] run du ${aujourdhui} — ${SOURCES_ACTIVES.length} source(s) active(s), ` +
     `${SOURCES_BLOQUEES.length} bloquée(s)`);
 
   const { records, log } = await collecterSources({ pages });
   const existants = await lireRegistreExistant();
-  const { entrees, nbNouveaux, nbMisAJour, nbLegacy } =
-    fusionner(existants, records, aujourdhui, { conserverLegacy });
+  const statuts = lireStatuts(RACINE);
+  const { entrees, nbNouveaux, nbMisAJour } =
+    fusionner(existants, records, aujourdhui, statuts);
 
-  if (nbLegacy) {
-    console.log(
-      `[veille] ${nbLegacy} entrée(s) sans sourceRef (antérieures à la veille auto) ` +
-      `${conserverLegacy ? 'conservées' : 'écartées — relancer avec --conserver-legacy pour les garder'}`
-    );
-  }
+  // Répartition par statut de revue : c'est l'indicateur de charge de travail.
+  const parStatut = {};
+  for (const code of CODES) parStatut[code] = 0;
+  for (const e of entrees) parStatut[e.statutRevue] = (parStatut[e.statutRevue] || 0) + 1;
 
   const stats = {
     sourcesActives: SOURCES_ACTIVES.length,
@@ -316,9 +330,8 @@ export async function lancerVeille({ pages = 2, conserverLegacy = false } = {}) 
     textesRetenus: records.length,
     nbNouveaux,
     nbMisAJour,
-    nbLegacy,
-    legacyConservees: conserverLegacy,
     totalRegistre: entrees.length,
+    parStatut,
   };
 
   ecrireFichiers({ entrees, log, stats, aujourdhui });
@@ -326,6 +339,10 @@ export async function lancerVeille({ pages = 2, conserverLegacy = false } = {}) 
   console.log(
     `[veille] terminé — ${stats.totalRegistre} texte(s) au registre ` +
     `(${nbNouveaux} nouveau(x), ${nbMisAJour} mis à jour)`
+  );
+  console.log(
+    '[veille] revue : ' +
+    CODES.map((c) => `${libelleStatut(c)} ${parStatut[c] || 0}`).join(' · ')
   );
   return stats;
 }

@@ -41,7 +41,7 @@ jobs:
 
       - name: Vérifier le classifieur
         # Si le filtre HSE est cassé, mieux vaut ne pas publier un registre faux.
-        run: node --test scripts/veille/hse.test.mjs
+        run: npm test
 
       - name: Collecter les textes
         run: node scripts/collect-veille.mjs --pages "${{ inputs.pages || '3' }}"
