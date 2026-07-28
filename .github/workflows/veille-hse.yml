@@ -1,0 +1,85 @@
+name: Veille réglementaire HSE — Côte d'Ivoire
+
+# Interroge chaque jour les sources officielles ivoiriennes, régénère le
+# registre (data/textes.js), son journal de run (data/veille-log.js) et
+# l'export CSV, puis committe si le contenu a changé — ce qui déclenche le
+# redéploiement Vercel connecté au dépôt.
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # tous les jours à 06:00 UTC (06:00 à Abidjan)
+  workflow_dispatch:
+    inputs:
+      pages:
+        description: 'Nombre de pages CNDJ par nature de texte'
+        required: false
+        default: '3'
+
+# Nécessaire pour que le bot puisse committer le registre rafraîchi.
+# À vérifier une fois dans Settings → Actions → Workflow permissions :
+# « Read and write permissions ».
+permissions:
+  contents: write
+
+# Un seul run à la fois : deux collectes concurrentes se marcheraient dessus
+# au moment du commit.
+concurrency:
+  group: veille-hse
+  cancel-in-progress: false
+
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Vérifier le classifieur
+        # Si le filtre HSE est cassé, mieux vaut ne pas publier un registre faux.
+        run: node --test scripts/veille/hse.test.mjs
+
+      - name: Collecter les textes
+        run: node scripts/collect-veille.mjs --pages "${{ inputs.pages || '3' }}"
+
+      - name: Publier le registre si changé
+        run: |
+          if git diff --quiet -- data/; then
+            echo "Aucun changement — rien à publier."
+            exit 0
+          fi
+          git config user.name "regalert-bot"
+          git config user.email "bot@regalertci.com"
+          git add data/
+          git commit -m "chore(veille): rafraîchit le registre HSE du $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: Résumé du run
+        if: always()
+        run: |
+          {
+            echo "### Veille HSE — $(date -u +%Y-%m-%d)"
+            echo ""
+            if [ -f data/veille-log.js ]; then
+              node -e "
+                const m = await import('./data/veille-log.js');
+                const r = m.dernierRun;
+                console.log('| Indicateur | Valeur |');
+                console.log('|---|---|');
+                console.log(\`| Sources accessibles | \${r.sourcesAccessibles}/\${r.sourcesActives} |\`);
+                console.log(\`| Sources à vérifier manuellement | \${r.sourcesBloquees} |\`);
+                console.log(\`| Textes retenus ce run | \${r.textesRetenus} |\`);
+                console.log(\`| Nouveaux | \${r.nbNouveaux} |\`);
+                console.log(\`| Total au registre | \${r.totalRegistre} |\`);
+                console.log('');
+                console.log('#### Sources en échec');
+                for (const l of m.logSources.filter(x => x.statutAcces !== 'Accessible')) {
+                  console.log(\`- **\${l.source}** — \${l.commentaire}\`);
+                }
+              " --input-type=module 2>/dev/null || echo "(journal illisible)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
