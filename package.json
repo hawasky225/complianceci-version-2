@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "export": "next export"
+    "export": "next export",
+    "veille": "node scripts/collect-veille.mjs",
+    "test": "node --test scripts/veille/hse.test.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",
