@@ -1,6 +1,6 @@
 // Généré par scripts/collect-veille.mjs — ne pas éditer à la main.
-// Veille réglementaire HSE Côte d'Ivoire. Dernier run : 2026-08-07T07:20:42.114Z
-// 64 texte(s) au registre, dont 1 nouveau(x) ce run.
+// Veille réglementaire HSE Côte d'Ivoire. Dernier run : 2026-08-08T06:56:04.173Z
+// 64 texte(s) au registre, dont 0 nouveau(x) ce run.
 
 export const textesEnrichis = [
   {"id":1,"titre":"LOI N° 2025-527 du 25/06/2025, portant Code de l'Assainissement et du Drainage","source":"CNDJ — Bibliothèque juridique","sourceId":"cndj","sourceRef":"cndj:67669","statut":"En vigueur","typeEntree":"texte","typeEntreeLibelle":"Texte réglementaire","datePublication":"2025-06-25","dateEntreeVigueur":"2025-06-25","dateDetection":"2026-07-28","badge":"Nouveau","ceQuiChange":["À déterminer — consulter le texte officiel"],"obligationsPrincipales":["À déterminer — analyse en cours"],"sanctions":["Voir le texte officiel"],"impactRH":false,"impactFiscal":false,"impactHSE":true,"impactJuridique":true,"domaines":["Eau / Assainissement"],"domaine":"Eau / Assainissement","secteurs":["Tous"],"ministere":"—","numero":"2025-527","nature":"Loi","joReference":"N° 13 spécial bis du 23/07/2025 ; P.653","lien":"https://biblio.cndj.ci/search/textes/67669?type=1","extrait":"LOI N° 2025-527 du 25/06/2025, portant Code de l'Assainissement et du Drainage","motsCles":["assainissement","drainage"],"scoreHSE":6,"statutRevue":"a_analyser","statutRevueLibelle":"À analyser"},
