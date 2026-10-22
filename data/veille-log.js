@@ -1,15 +1,15 @@
 // Généré par scripts/collect-veille.mjs — ne pas éditer à la main.
-// Journal d'accessibilité des sources, run du 2026-10-21.
+// Journal d'accessibilité des sources, run du 2026-10-22.
 
 export const dernierRun = {
-  "date": "2026-10-21",
-  "horodatage": "2026-10-21T11:21:56.599Z",
+  "date": "2026-10-22",
+  "horodatage": "2026-10-22T11:19:22.093Z",
   "sourcesActives": 12,
   "sourcesBloquees": 3,
-  "sourcesAccessibles": 9,
-  "textesRetenus": 25,
+  "sourcesAccessibles": 10,
+  "textesRetenus": 61,
   "nbNouveaux": 0,
-  "nbMisAJour": 25,
+  "nbMisAJour": 61,
   "totalRegistre": 77,
   "parStatut": {
     "a_analyser": 77,
@@ -20,18 +20,18 @@ export const dernierRun = {
 };
 
 export const logSources = [
-  {"source":"CNDJ — Bibliothèque juridique","sourceId":"cndj","domaine":"Transversal","url":"https://biblio.cndj.ci/search/textes?type=1","statutAcces":"Accessible","liensAnalyses":174,"alertesRetenues":3,"dureeMs":76122,"commentaire":"174 lien(s) analysé(s), 3 retenu(s) après filtre HSE."},
-  {"source":"Ministère de l'Environnement et de la Transition Écologique","sourceId":"environnement","domaine":"Environnement","url":"https://www.environnement.gouv.ci/actualites","statutAcces":"Accessible","liensAnalyses":111,"alertesRetenues":20,"dureeMs":9355,"commentaire":"111 lien(s) analysé(s), 20 retenu(s) après filtre HSE."},
-  {"source":"CIAPOL — Centre Ivoirien Antipollution","sourceId":"ciapol","domaine":"Environnement","url":"https://ciapol.ci/","statutAcces":"Accessible","liensAnalyses":7,"alertesRetenues":0,"dureeMs":3468,"commentaire":"7 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
-  {"source":"ONPC — Office National de la Protection Civile","sourceId":"onpc","domaine":"Incendie / Sécurité","url":"https://www.onpc-ci.org/actualite","statutAcces":"Échec","liensAnalyses":0,"alertesRetenues":0,"dureeMs":1719,"commentaire":"ONPC — Office National de la Protection Civile : HTTP 403 sur https://www.onpc-ci.org/actualite ; ONPC — Office National de la Protection Civile : HTTP 403 sur https://www.onpc-ci.org/"},
-  {"source":"CNPS — Caisse Nationale de Prévoyance Sociale","sourceId":"cnps","domaine":"Social / CNPS","url":"https://www.cnps.ci/","statutAcces":"Accessible","liensAnalyses":20,"alertesRetenues":0,"dureeMs":3098,"commentaire":"20 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
-  {"source":"Ministère de l'Emploi et de la Protection Sociale","sourceId":"emploi","domaine":"SST / Travail","url":"https://www.emploi.gouv.ci/accueil","statutAcces":"Échec","liensAnalyses":0,"alertesRetenues":0,"dureeMs":2590,"commentaire":"Ministère de l'Emploi et de la Protection Sociale : HTTP 403 sur https://www.emploi.gouv.ci/accueil"},
-  {"source":"Ministère des Mines, du Pétrole et de l'Énergie","sourceId":"energie","domaine":"Énergie","url":"https://www.energie.gouv.ci/energie/textes-et-lois","statutAcces":"Accessible","liensAnalyses":22,"alertesRetenues":1,"dureeMs":6919,"commentaire":"22 lien(s) analysé(s), 1 retenu(s) après filtre HSE."},
-  {"source":"ANARE-CI — Régulation du secteur électricité","sourceId":"anare","domaine":"Énergie","url":"https://anare.ci/documents/lois-et-reglementation/les-decrets/","statutAcces":"Accessible","liensAnalyses":148,"alertesRetenues":1,"dureeMs":10667,"commentaire":"148 lien(s) analysé(s), 1 retenu(s) après filtre HSE."},
-  {"source":"Ministère des Transports","sourceId":"transports","domaine":"Transport / TMD","url":"https://transports.gouv.ci/","statutAcces":"Accessible","liensAnalyses":104,"alertesRetenues":0,"dureeMs":4411,"commentaire":"104 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
-  {"source":"Portail officiel du Gouvernement","sourceId":"gouv","domaine":"Transversal","url":"https://www.gouv.ci/actualites","statutAcces":"Échec","liensAnalyses":0,"alertesRetenues":0,"dureeMs":94504,"commentaire":"Portail officiel du Gouvernement : 20 sur https://www.gouv.ci/actualites"},
-  {"source":"Loidici — veille juridique ivoirienne","sourceId":"loidici","domaine":"Transversal","url":"https://loidici.biz/","statutAcces":"Accessible","liensAnalyses":30,"alertesRetenues":0,"dureeMs":2804,"commentaire":"30 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
-  {"source":"SGG — Documenthèque","sourceId":"sgg-documentheque","domaine":"Transversal","url":"https://www.sgg.gouv.ci/documentheque.php?id_cas=2","statutAcces":"Accessible","liensAnalyses":1,"alertesRetenues":0,"dureeMs":4062,"commentaire":"1 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
+  {"source":"CNDJ — Bibliothèque juridique","sourceId":"cndj","domaine":"Transversal","url":"https://biblio.cndj.ci/search/textes?type=1","statutAcces":"Accessible","liensAnalyses":174,"alertesRetenues":3,"dureeMs":76530,"commentaire":"174 lien(s) analysé(s), 3 retenu(s) après filtre HSE."},
+  {"source":"Ministère de l'Environnement et de la Transition Écologique","sourceId":"environnement","domaine":"Environnement","url":"https://www.environnement.gouv.ci/actualites","statutAcces":"Accessible","liensAnalyses":112,"alertesRetenues":20,"dureeMs":8555,"commentaire":"112 lien(s) analysé(s), 20 retenu(s) après filtre HSE."},
+  {"source":"CIAPOL — Centre Ivoirien Antipollution","sourceId":"ciapol","domaine":"Environnement","url":"https://ciapol.ci/","statutAcces":"Accessible","liensAnalyses":7,"alertesRetenues":0,"dureeMs":4237,"commentaire":"7 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
+  {"source":"ONPC — Office National de la Protection Civile","sourceId":"onpc","domaine":"Incendie / Sécurité","url":"https://www.onpc-ci.org/actualite","statutAcces":"Échec","liensAnalyses":0,"alertesRetenues":0,"dureeMs":947,"commentaire":"ONPC — Office National de la Protection Civile : HTTP 403 sur https://www.onpc-ci.org/actualite ; ONPC — Office National de la Protection Civile : HTTP 403 sur https://www.onpc-ci.org/"},
+  {"source":"CNPS — Caisse Nationale de Prévoyance Sociale","sourceId":"cnps","domaine":"Social / CNPS","url":"https://www.cnps.ci/","statutAcces":"Accessible","liensAnalyses":20,"alertesRetenues":0,"dureeMs":2772,"commentaire":"20 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
+  {"source":"Ministère de l'Emploi et de la Protection Sociale","sourceId":"emploi","domaine":"SST / Travail","url":"https://www.emploi.gouv.ci/accueil","statutAcces":"Échec","liensAnalyses":0,"alertesRetenues":0,"dureeMs":2071,"commentaire":"Ministère de l'Emploi et de la Protection Sociale : HTTP 403 sur https://www.emploi.gouv.ci/accueil"},
+  {"source":"Ministère des Mines, du Pétrole et de l'Énergie","sourceId":"energie","domaine":"Énergie","url":"https://www.energie.gouv.ci/energie/textes-et-lois","statutAcces":"Accessible","liensAnalyses":22,"alertesRetenues":1,"dureeMs":5751,"commentaire":"22 lien(s) analysé(s), 1 retenu(s) après filtre HSE."},
+  {"source":"ANARE-CI — Régulation du secteur électricité","sourceId":"anare","domaine":"Énergie","url":"https://anare.ci/documents/lois-et-reglementation/les-decrets/","statutAcces":"Accessible","liensAnalyses":148,"alertesRetenues":1,"dureeMs":10199,"commentaire":"148 lien(s) analysé(s), 1 retenu(s) après filtre HSE."},
+  {"source":"Ministère des Transports","sourceId":"transports","domaine":"Transport / TMD","url":"https://transports.gouv.ci/","statutAcces":"Accessible","liensAnalyses":104,"alertesRetenues":0,"dureeMs":6065,"commentaire":"104 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
+  {"source":"Portail officiel du Gouvernement","sourceId":"gouv","domaine":"Transversal","url":"https://www.gouv.ci/actualites","statutAcces":"Accessible","liensAnalyses":2369,"alertesRetenues":36,"dureeMs":15208,"commentaire":"2369 lien(s) analysé(s), 36 retenu(s) après filtre HSE."},
+  {"source":"Loidici — veille juridique ivoirienne","sourceId":"loidici","domaine":"Transversal","url":"https://loidici.biz/","statutAcces":"Accessible","liensAnalyses":30,"alertesRetenues":0,"dureeMs":2215,"commentaire":"30 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
+  {"source":"SGG — Documenthèque","sourceId":"sgg-documentheque","domaine":"Transversal","url":"https://www.sgg.gouv.ci/documentheque.php?id_cas=2","statutAcces":"Accessible","liensAnalyses":1,"alertesRetenues":0,"dureeMs":3336,"commentaire":"1 lien(s) analysé(s), 0 retenu(s) après filtre HSE."},
   {"source":"SGG — Journal Officiel","sourceId":"sgg-jo","domaine":"Transversal","url":"https://www.sgg.gouv.ci/jo.php","statutAcces":"À vérifier manuellement","liensAnalyses":0,"alertesRetenues":0,"dureeMs":0,"commentaire":"Page servie normalement mais protégée par identifiant : la consultation du JO exige un code de téléchargement délivré par le service JO du SGG (+225 20 32 59 66). Ce n'est pas un blocage technique.","action":"Obtenir un compte JO auprès du SGG, puis ajouter l'authentification à cette source. C'est la source la plus complète du dispositif."},
   {"source":"ANDE — Agence Nationale De l'Environnement","sourceId":"ande","domaine":"Environnement","url":"https://ande-ci.com/","statutAcces":"À vérifier manuellement","liensAnalyses":0,"alertesRetenues":0,"dureeMs":0,"commentaire":"Certificat TLS du site expiré le 12/12/2024 : toute connexion HTTPS vérifiée échoue. Le contenu est servi normalement une fois la vérification désactivée, ce que la veille ne fait pas volontairement.","action":"Signaler l'expiration à l'ANDE. À défaut, consultation manuelle."},
   {"source":"Présidence — communiqués du Conseil des ministres","sourceId":"presidence","domaine":"Transversal","url":"https://www.presidence.ci/communiques-ministres/","statutAcces":"À vérifier manuellement","liensAnalyses":0,"alertesRetenues":0,"dureeMs":0,"commentaire":"Chaîne TLS incomplète (certificat intermédiaire absent) : les clients stricts refusent la connexion. Le site répond par ailleurs 403 aux User-Agents identifiés comme robots.","action":"Les décisions du Conseil des ministres restent captées via le portail gouv.ci/actualites, qui les relaie."}
