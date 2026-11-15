@@ -1,5 +1,5 @@
 // Généré par scripts/collect-veille.mjs — ne pas éditer à la main.
-// Veille réglementaire HSE Côte d'Ivoire. Dernier run : 2026-11-14T13:06:00.549Z
+// Veille réglementaire HSE Côte d'Ivoire. Dernier run : 2026-11-15T13:35:02.938Z
 // 83 texte(s) au registre, dont 0 nouveau(x) ce run.
 
 export const textesEnrichis = [
